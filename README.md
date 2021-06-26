@@ -12,7 +12,7 @@ If you publish articles, you probably want to know if people are reading
 them. You can count raw hits but especially if you aren't drawing a lot of
 traffic, many of these hits are actually bots and crawlers. 
 
-In addition, that the page got loaded doesn't tell you of the visitor
+In addition, that the page got loaded doesn't tell you if the visitor
 actually read your work.
 
 Some time ago I was involved with a Dutch newspaper article, and they could
