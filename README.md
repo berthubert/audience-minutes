@@ -34,7 +34,14 @@ the end of your page or not.
 Privacy
 -------
 These scripts use no cookies and no local storage. There are no identifiers.
-You can run this without having to add a cookie or GDPR banner etc. 
+You can run this without having to add a cookie or GDPR banner etc. However,
+I personaly prefer to sample as little as possible. Many sites will track
+your every click, and even note if you switch to another tab. I find that
+somewhat upsetting.
+
+You can tailor your level of intrusiveness with the `reportingProbability`
+setting. The busier your site is the lower you can set this at and still
+have decent statistics.
 
 Javascript
 ----------
