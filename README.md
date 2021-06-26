@@ -4,7 +4,7 @@ receiving, and if readers make it to the end of your screeds.
 
 > “If we have data, let’s look at data. If all we have are opinions, let’s go with mine.” - Jim Barksdale.
 
-
+![](/sample-rata/graph.png)
 
 Javascript
 ----------
