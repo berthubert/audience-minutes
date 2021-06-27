@@ -4,14 +4,14 @@
 
 BEGIN { printf("url,perc,count\n"); }
 {
-    split($11, parts, "?");
-    url=parts[1];
+    split($11, parts, "[\"?]");
+    url=parts[2];
 
     #   0                      1       2 3     4
     # /articles/report.json?scrollPerc=4&count=5
     if($7 ~ /report.json/) {
         split($7, parts, "[?=&]");
     
-        printf("%s,%s,%s\n", url, parts[3], parts[5]);
+        printf("\"%s\",%s,%s\n", url, parts[3], parts[5]);
     }
 }
