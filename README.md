@@ -31,6 +31,9 @@ In addition, these reports measure at what percentage of the content your
 reader is positioned. This helps you determine if people are making it to
 the end of your page or not.
 
+At the end of this page I've included some discussion how to interpret the
+data.
+
 Privacy
 -------
 These scripts use no cookies and no local storage. There are no identifiers.
@@ -73,9 +76,59 @@ To turn the CSV file into a graphs, use [this Jupyter
 script](audience.ipynb), from which you can also extract Python 3 if you
 don't want to run Jupyter. It is based on Pandas and Matplotlib.
 
+How to interpret the results
+----------------------------
+For starters, you'll notice that even quite high visitor numbers translate
+into not that many "audience minutes". This is not due to this script, it is
+a common disappointment. So if your calculations show that an article had
+100 reading hours, this actually is quite a lot. 
+
+For obvious reasons, professional media operations are not very forthcoming
+with these statistics on their readership. One big newspaper article I
+worked on garnered 75 confirmed reading hours, for example.
+
+So why are these numbers so low? For starters, you may not be seeing all
+readers. Perhaps the script doesn't fire on all devices. I've done some
+research, I don't think this is a major factor. But it could be.
+
+On the other hand, there is a ton of automated traffic coming to sites these
+days, lots of crawlers, bots, strange scanners etc. Mind you, some of these
+will even execute Javascript! But most won't. This non-human traffic may
+have been inflating your numbers previously.
+
+In terms of the graph, if you have a ton of data, interpretation is easy. I
+find that you can even see where you put big photos in an article - these
+sections do not get a lot of reading minutes.
+
+If you have less data, you need to reduce the number of 'bins' in the
+histogram. I find that 10 bins work pretty well for general conclusions, and
+that might get you this:
+
+![](/sample-data/histo10.png)
+
+If you get this, you can conclude that 1) most people that visited the URL
+actually wanted to read this kind of content and 2) most readers made it to
+the end of your article. The profile is mostly flat, with only some drop-off
+near the end, and no suspicious peak at the beginning.
+
+Contast this with:
+
+![](/sample-data/histo10b.png)
+
+This was an article that was extremely popular on HackerNews and a few other
+places. But we can see that readership clearly peaked in the first 10%. Lots
+of people decided that they had read enough at that point. This is
+caused by how the article got promoted, and it is not necessarily the
+"fault" of the writer.
+
+If we ignore the "mistargeting", from that point on, almost everyone makes
+it to the end of the article. 
+
+
 Sample data
 -----------
 If you want to help improve these small tools, but you don't yet have a lot
 data to work with, please find attached two weeks of data collected by 
 [berthub.eu/articles](https://berthub.eu/articles) in the
 [sample-data](sample-data/) directory.
+
