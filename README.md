@@ -46,7 +46,7 @@ You can tailor your level of intrusiveness with the `reportingProbability`
 setting. The busier your site is the lower you can set this at and still
 have decent statistics.
 
-Javascript
+JavaScript
 ----------
 Insert or link [audience-minutes.js](audience-minutes.js) from all pages you
 want to measure on. There are some settings at the beginning of the file
@@ -93,7 +93,7 @@ research, I don't think this is a major factor. But it could be.
 
 On the other hand, there is a ton of automated traffic coming to sites these
 days, lots of crawlers, bots, strange scanners etc. Mind you, some of these
-will even execute Javascript! But most won't. This non-human traffic may
+will even execute JavaScript! But most won't. This non-human traffic may
 have been inflating your numbers previously.
 
 In terms of the graph, if you have a ton of data, interpretation is easy. I
