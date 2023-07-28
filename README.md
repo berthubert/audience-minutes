@@ -111,7 +111,7 @@ actually wanted to read this kind of content and 2) most readers made it to
 the end of your article. The profile is mostly flat, with only some drop-off
 near the end, and no suspicious peak at the beginning.
 
-Contast this with:
+Contrast this with:
 
 ![](/sample-data/histo10b.png)
 
