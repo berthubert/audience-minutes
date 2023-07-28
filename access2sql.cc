@@ -117,7 +117,7 @@ bool starts_with(const std::string& str, const std::string& prefix)
     return str.compare(0, prefix.length(), prefix) == 0;
 }
 
-// writen by ChatGPT!
+// written by ChatGPT!
 vector<string> split_string(const string& input)
 {
   istringstream iss(input);
