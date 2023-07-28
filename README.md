@@ -38,7 +38,7 @@ Privacy
 -------
 These scripts use no cookies and no local storage. There are no identifiers.
 You can run this without having to add a cookie or GDPR banner etc. However,
-I personaly prefer to sample as little as possible. Many sites will track
+I personally prefer to sample as little as possible. Many sites will track
 your every click, and even note if you switch to another tab. I find that
 somewhat upsetting.
 
