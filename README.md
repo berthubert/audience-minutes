@@ -76,6 +76,18 @@ To turn the CSV file into a graphs, use [this Jupyter
 script](audience.ipynb), from which you can also extract Python 3 if you
 don't want to run Jupyter. It is based on Pandas and Matplotlib.
 
+A few words on 'density'
+------------------------
+The "density" is which proportion of the samples were from that part of the
+page.  So if everyone reads the page straight to the end, at a constant
+speed, the density is flat for the whole page.  If it drops off, it means
+some people abandonded the page.  If there is a particularly difficult part
+that takes people a long time to read, this would show up as a positive bump
+in the density.  Conversely, of there is a list of bulletpoints that people
+can go through quickly, that would show up as a negative bump in the
+density.
+
+
 How to interpret the results
 ----------------------------
 For starters, you'll notice that even quite high visitor numbers translate
