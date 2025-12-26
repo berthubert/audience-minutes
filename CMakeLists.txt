@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.1)
-set(CMAKE_CXX_FLAGS "-Wall -Wextra -O3")
+set(CMAKE_CXX_FLAGS "-Wall -Wextra -g -O3")
 
 project(audience VERSION 1.0
                   DESCRIPTION "Hello deep learning"
@@ -17,5 +17,5 @@ set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
 set(THREADS_PREFER_PTHREAD_FLAG TRUE)
 find_package(Threads REQUIRED)
 
-add_executable(access2sql access2sql.cc ext/sqlitewriter/sqlwriter.cc)
-target_link_libraries(access2sql sqlite3 Threads::Threads)
+add_executable(access2sql access2sql.cc ext/sqlitewriter/psqlwriter.cc ext/sqlitewriter/minipsql.cc)
+target_link_libraries(access2sql sqlite3 pq Threads::Threads)
