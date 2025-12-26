@@ -4,13 +4,29 @@
 #include <vector>
 #include <sstream>
 #include <time.h>
-#include "ext/sqlitewriter/sqlwriter.hh"
+// #include "ext/sqlitewriter/sqlwriter.hh"
+#include "ext/sqlitewriter/psqlwriter.hh"
 
 /* You can pipe a typical access.log into this, and it will populate sqlite3 database ('access.sqlite3') for you, in streaming fashion.
    You can safely access that sqlite database while the program runs, see https://berthub.eu/articles/posts/big-data-storage/
 
    A fun view to create:
  create view botfree as select * from data where agent like 'Mozilla/5.0 %' and agent not like '%bot%' and agent not like '%miniflux%' 
+
+CREATE OR REPLACE VIEW public.botfree AS
+ SELECT data.siz,
+    data.ref,
+    data.agent,
+    data.params,
+    data.url,
+    data.ip,
+    data.stat,
+    data."timestamp"
+   FROM data
+  WHERE data.agent ~~ 'Mozilla/5.0 %'::text AND data.agent !~~ '%bot%'::text AND data.agent !~~ '%miniflux%'::text AND data.ref <> 'http://www.google.co.uk/url?sa=t&source=web&cd=1'::text
+  and data.ip <> '100.25.31.6'::text and data.ip <> '2a04:c47:e00:d3e3:4db:78ff:fe00:57'::text and data.ip <> '194.182.176.137'::text
+  
+
 
    This filters out the bulk of bots right now. 
 */
@@ -132,9 +148,10 @@ int main(int argc, char** argv)
 try
 {
   Parser p(stdin);
-  SQLiteWriter sqw(argc > 1 ? argv[1] : "access.sqlite3");
+  // SQLiteWriter sqw(argc > 1 ? argv[1] : "access.sqlite3");
+  PSQLWriter sqw(argc > 1 ? argv[1] : "accesslog");
   
-  // ::ffff:194.117.254.60 - - [19/Mar/2023:00:00:10 +0100] "GET /articles/posts/nerdfluisteraar/ HTTP/1.1" 200 16627 "-" "Friendica 'Giant Rhubarb' 2023.01-1502; https://friendica.se1.eu"
+  // ::ffff:146.255.56.92 - - [30/Aug/2025:15:12:11 +0200] "GET / HTTP/1.1" 200 6607 "-" "Mastodon/4.4.3-stable+ff1 (http.rb/5.3.1; +https://sloth.es/)" "berthub.eu"
 
   for(;;) {
     try {
@@ -150,6 +167,8 @@ try
       int64_t size = p.getNumber();
       string ref = p.getDelim('"', '"');
       string agent = p.getDelim('"', '"');
+      string host = p.getDelim('"', '"');
+      cout << "host: "<<host<<endl;
       auto parts = split_string(req);
       string url;
       string params;
@@ -163,7 +182,7 @@ try
       }
       sqw.addValue({{"timestamp", tim}, {"ip", ip}, {"url", url},
                     {"params", params}, {"agent", agent}, {"ref", ref},
-                    {"stat", stat}, {"siz", size}});
+                    {"stat", stat}, {"siz", size}, {"host", host}});
     }
     catch(std::exception& i) {
       cerr<<i.what()<<endl;
