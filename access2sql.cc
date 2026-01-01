@@ -4,10 +4,14 @@
 #include <vector>
 #include <sstream>
 #include <time.h>
+#include <deque>
+#include <unordered_set>
+#include "ac2web.hh"
+
 // #include "ext/sqlitewriter/sqlwriter.hh"
 #include "ext/sqlitewriter/psqlwriter.hh"
 
-/* You can pipe a typical access.log into this, and it will populate sqlite3 database ('access.sqlite3') for you, in streaming fashion.
+/* You can pipe a typical access.log into this, and it will populate a database  for you, in streaming fashion.
    You can safely access that sqlite database while the program runs, see https://berthub.eu/articles/posts/big-data-storage/
 
    A fun view to create:
@@ -144,22 +148,31 @@ vector<string> split_string(const string& input)
   return tokens;
 }
 
+
 int main(int argc, char** argv)
 try
 {
   Parser p(stdin);
   // SQLiteWriter sqw(argc > 1 ? argv[1] : "access.sqlite3");
   PSQLWriter sqw(argc > 1 ? argv[1] : "accesslog");
+
+  auto t = std::thread(launchWeb);
+  t.detach();
   
   // ::ffff:146.255.56.92 - - [30/Aug/2025:15:12:11 +0200] "GET / HTTP/1.1" 200 6607 "-" "Mastodon/4.4.3-stable+ff1 (http.rb/5.3.1; +https://sloth.es/)" "berthub.eu"
+
 
   for(;;) {
     try {
       string ip = p.getWord();
       string ign1 = p.getWord();
       string ign2 = p.getWord();
-      if(starts_with(ip, "::ffff:"))
+      bool ipv4 = false;
+      if(starts_with(ip, "::ffff:")) {
         ip = ip.substr(7);
+	ipv4 = true;
+      }
+
       string t = p.getDelim('[', ']');
       time_t tim = getTime(t);
       string req = p.getDelim('"', '"');
@@ -168,7 +181,8 @@ try
       string ref = p.getDelim('"', '"');
       string agent = p.getDelim('"', '"');
       string host = p.getDelim('"', '"');
-      cout << "host: "<<host<<endl;
+
+      
       auto parts = split_string(req);
       string url;
       string params;
@@ -183,6 +197,21 @@ try
       sqw.addValue({{"timestamp", tim}, {"ip", ip}, {"url", url},
                     {"params", params}, {"agent", agent}, {"ref", ref},
                     {"stat", stat}, {"siz", size}, {"host", host}});
+
+      lock_guard<mutex> mut(g_metrics_mutex);
+      map<string, string> labels;
+      labels["host"]=host;
+      labels["ipv"] = ipv4 ? "4" : "6";
+      labels["bot"] = (!agent.starts_with("Mozilla/5.0 ") || agent.contains("bot") || agent.contains("miniflux")) ? "1" : "0";
+
+      g_tnus[labels].add(ip); // don't want the status in there
+      
+      labels["status"] = to_string(stat);
+      
+
+      
+      g_metrics[{"queries",labels}]++;
+      g_metrics[{"bytesSent",labels}] += size;
     }
     catch(std::exception& i) {
       cerr<<i.what()<<endl;
