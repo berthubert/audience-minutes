@@ -27,7 +27,7 @@ public:
 
   void bindPrep(const std::string& table, int idx, const std::string& value)
   {
-    int pos = idx-1;
+    unsigned int pos = idx-1;
     if(d_params[table].size() <= pos)
       d_params[table].resize(pos+1);
     d_params[table][pos]=value;

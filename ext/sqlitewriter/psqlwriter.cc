@@ -109,7 +109,7 @@ void PSQLWriter::commitThread()
     for(; lim < 10000 && sumparms < 60000; ++lim) {
       Message* msg;
       if(needWait) {
-        cout<<"Waiting for data.."<<endl;
+	//  cout<<"Waiting for data.."<<endl;
         waitForData(d_pipe[0], 1);
       }
       int rc = read(d_pipe[0], &msg, sizeof(msg));
@@ -131,7 +131,7 @@ void PSQLWriter::commitThread()
       tabwork[msg->table].push_back(msg);
       needWait=false;
     }
-    cout<<"Received "<<lim<<" messages "<<"from "<<tabwork.size()<<" tables with work, took "<<dt.lapUsec()/1000.0<<"msec, fields:";
+    //    cout<<"Received "<<lim<<" messages "<<"from "<<tabwork.size()<<" tables with work, took "<<dt.lapUsec()/1000.0<<"msec, fields:";
     dt.start();
 
     for(auto& [table, work] : tabwork) {
@@ -150,7 +150,7 @@ void PSQLWriter::commitThread()
                        {
                          return a.first < b.first;
                        })) {
-              cout<<"shit, we miss "<<f.first<<endl;
+              // cout<<"shit, we miss '"<<f.first<<"'"<<endl;
               if(std::get_if<double>(&f.second)) {
                 mp.addColumn(table, f.first, "REAL");
                 schemas[table].push_back({f.first, "REAL"});
@@ -178,7 +178,7 @@ void PSQLWriter::commitThread()
           query+=',';
         first=false;
         query+=f;
-        cout<<" "<<f;
+        //cout<<" "<<f;
       }
       query += ") values ";
       int ctr=1;
@@ -188,7 +188,7 @@ void PSQLWriter::commitThread()
           query +=',';
         query += '(';
         first=true;              
-        for(const auto& f: fields ) {
+        for(const auto& f [[maybe_unused]]: fields ) {
           if(!first)
             query +=',';
           first=false;
@@ -199,7 +199,7 @@ void PSQLWriter::commitThread()
         
         query += ')';
       }
-      cout<<"building query: "<<dt.lapUsec()/1000.0<<"ms\n";
+      // cout<<"building query: "<<dt.lapUsec()/1000.0<<"ms\n";
       
     //    cout<<query<<endl;
       
@@ -222,7 +222,7 @@ void PSQLWriter::commitThread()
           }
         }
       }
-      cout<<endl;
+
 //      cout<<"params 1 took "<<dt.lapUsec()/1000.0<<" msec\n";
       // types: integers, values are variable length, the lengths are integers,
       //                                      array of pointers
@@ -244,7 +244,6 @@ void PSQLWriter::commitThread()
 //      cout<<"cleanup took "<<dt.lapUsec()/1000.0<<" msec\n";
       
       if(prevcommit != time(0)) {
-        cout<<"commit"<<endl;
         mp.exec("commit");
         mp.exec("begin");
         prevcommit = time(0);

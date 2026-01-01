@@ -70,7 +70,7 @@ private:
 template<typename T>
 void PSQLWriter::addValueGeneric(const std::string& table, const T& values)
 {
-  auto msg = new Message({table});
+  auto msg = new Message({.table = table, .values={} });
   for(const auto& v : values) {
     msg->values[v.first] = v.second;
   }
