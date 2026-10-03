@@ -144,3 +144,8 @@ data to work with, please find attached two weeks of data collected by
 [berthub.eu/articles](https://berthub.eu/articles) in the
 [sample-data](sample-data/) directory.
 
+# Country data
+You can get dbip-country-lite.csv from https://db-ip.com/db/download/ip-to-country-lite
+
+And dbip-asn-lite from:
+https://download.db-ip.com/free/dbip-asn-lite-2026-04.csv.gz

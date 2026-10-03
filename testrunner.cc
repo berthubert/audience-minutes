@@ -20,3 +20,29 @@ TEST_CASE("time") {
   CHECK(getTimeFromLog("26/Apr/2026:08:41:30 -0230") == 1777201890);
 }
 
+
+TEST_CASE("country") {
+  CountryDB cdb("dbip-country-lite.csv");
+  
+  CHECK(cdb.getCountry("86.82.68.237") == "NL");
+  CHECK(cdb.getCountry("217.100.190.174") == "NL");
+  CHECK(cdb.getCountry("2001:41f0:782d::2") == "NL");
+
+}
+
+TEST_CASE("asn") {
+  CountryDB cdb("dbip-asn-lite.csv");
+  
+  CHECK(cdb.getCountry("86.82.68.237") == R"(1136,"KPN B.V.")");
+  CHECK(cdb.getCountry("217.100.190.174") == R"(33915,"Vodafone Libertel B.V.")");
+  CHECK(cdb.getCountry("2001:41f0:782d::2") == R"(33915,"Vodafone Libertel B.V.")");
+  CHECK(cdb.getCountry("2a02:a440:b085:1:20d:b9ff:fe58:11f0") == R"(1136,"KPN B.V.")");
+
+  CHECK(cdb.getASName("2a02:a440:b085:1:20d:b9ff:fe58:11f0") == "KPN B.V.");
+  CHECK(cdb.getAS("2a02:a440:b085:1:20d:b9ff:fe58:11f0") == 1136);
+
+
+  CHECK(cdb.getAS("240e:838:10::1") == 4134);
+  CHECK(cdb.getASName("240e:838:10::1") == "Chinanet");
+}
+

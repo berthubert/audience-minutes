@@ -22,5 +22,11 @@ add_executable(access2sql access2sql.cc ac2web.cc ext/sqlitewriter/psqlwriter.cc
 
 target_link_libraries(access2sql sqlite3 pq fmt Threads::Threads)
 
-add_executable(testrunner testrunner.cc support.cc)
+add_executable(testrunner testrunner.cc support.cc comboaddress.cc)
+
+
+add_executable(resproxy resproxy.cc comboaddress.cc support.cc comboaddress.cc)
+
+
+target_link_libraries(resproxy pq pqxx fmt Threads::Threads)
 

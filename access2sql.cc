@@ -8,7 +8,7 @@
 #include <unordered_set>
 #include "ac2web.hh"
 #include "comboaddress.hh"
-#include "IITree.h"
+
 #include <fmt/printf.h>
 #include <memory>
 #include <random>
@@ -32,6 +32,9 @@ CREATE OR REPLACE VIEW public.botfree AS
     data.url,
     data.ip,
     data.stat,
+    data.country,
+    data.asn,
+    data.asname,
     data."timestamp"
    FROM data
   WHERE data.agent ~~ 'Mozilla/5.0 %'::text AND data.agent !~~ '%bot%'::text AND data.agent !~~ '%miniflux%'::text AND data.ref <> 'http://www.google.co.uk/url?sa=t&source=web&cd=1'::text
@@ -146,118 +149,14 @@ vector<string> split_string(const string& input)
   return tokens;
 }
 
-/* singles:
-   Oops, 157.120.255.255 >= 157.120.255.255
-Oops, 159.60.131.186 >= 159.60.131.186
-Oops, 159.60.133.131 >= 159.60.133.131
-*/
-
-unsigned __int128 to128(const ComboAddress& in)
-{
-  if(in.sin4.sin_family == AF_INET)
-    return htonl(in.sin4.sin_addr.s_addr);
-  else if(in.sin4.sin_family == AF_INET6) {
-    unsigned __int128 ret=0;
-    uint8_t* dptr = (uint8_t*) &ret;
-    const uint8_t* sptr= (const uint8_t*) in.sin6.sin6_addr.s6_addr;
-    
-    for(int n=0; n < 16; ++n)
-      dptr[n] = sptr[15-n];
-
-    return ret;
-  }
-  throw std::runtime_error("Impossible ComboAddres");
-}
-
-static string p128(unsigned __int128 t)
-{
-  string reg;
-  uint8_t* ptr = (uint8_t*)&t;
-  for(int n=15; n>=0; --n) {
-    reg += fmt::sprintf("%02x", (unsigned int)ptr[n]);
-  }
-  return reg;
-}
-
-struct CountryDB
-{
-  explicit CountryDB(const std::string& fname)
-  {
-    FILE* fp = fopen(fname.c_str(), "r");
-    if(!fp)
-      throw std::runtime_error("Unable to open "+fname+" for reading IP addresses: "+string(strerror(errno)));
-    
-    shared_ptr<FILE> rfp(fp, fclose);
-    char line[80];
-    ComboAddress start, stop;
-
-    while(fgets(line, sizeof(line), rfp.get())) {
-      // 0.0.0.0,0.255.255.255,ZZ
-      char* ptr = strchr(line, ',');
-      if(!ptr)
-	continue;
-      *ptr = 0;
-      start = ComboAddress(line);
-      ptr++;
-      char *ptr2 = strchr(ptr, ',');
-      if(!ptr2)
-	continue;
-      *ptr2=0;
-      ptr2++;
-      stop = ComboAddress(ptr);
-
-      char* ptr3 = strchr(ptr2, '\n');
-      if(!ptr3)
-	continue;
-      *ptr3=0;
-      string country = ptr2;
-      if(country == "ZZ")
-	continue;
-      //      cout << ptr2 << endl;
-      if(!(start < stop) && start != stop) {
-	cout<<"Oops, "<<start.toString()<< " >= "<< stop.toString() <<endl;
-      }
-      //      if(start.sin4.sin_family != AF_INET)
-      //	continue;
-      //      cout<<start.toString() << " - "<< stop.toString()<<": "<<country<<endl;
-
-      d_tree.add(to128(start), to128(stop)+1, country);
-    }
-    d_tree.index();
-  }
-
-  string getCountry(const std::string& ip)
-  {
-    ComboAddress ca(ip);
-    auto s = to128(ca);
-    vector<size_t> result;
-    d_tree.overlap(s, s+1, result);
-
-    if(result.empty())
-      return "??";
-
-    return d_tree.data(result[0]);
-  }
-
-  IITree<unsigned __int128, std::string> d_tree;
-};
 
 int main(int argc, char** argv)
 try
 {
   // https://db-ip.com/db/download/ip-to-country-lite
   CountryDB cdb("dbip-country-lite.csv");
+  CountryDB asdb("dbip-asn-lite.csv");
   cout<<"Done with import!"<<endl;
-  /*
-  cout << cdb.getCountry("213.244.168.12") << endl;
-  cout << cdb.getCountry("130.161.252.29") << endl;
-  cout << cdb.getCountry("159.60.131.186") << endl;
-
-  cout << cdb.getCountry("2001:41f0:782d::2") << endl;  
-  cout << cdb.getCountry("2a04:4e42:30::144") << endl;
-  cout << cdb.getCountry("2600:3c04:e001:324:0:1991:8:25") << endl;
-  cout << cdb.getCountry("2001:503:ba3e::2:30") << endl;
-  */
   
   Parser p(stdin);
   // SQLiteWriter sqw(argc > 1 ? argv[1] : "access.sqlite3");
@@ -285,6 +184,8 @@ try
 	ipv4 = true;
       }
       string country = cdb.getCountry(ip);
+      string asname = asdb.getASName(ip);
+      int64_t asnum = asdb.getAS(ip);
       string t = p.getDelim('[', ']');
       time_t tim = getTimeFromLog(t);
       string req = p.getDelim('"', '"');
@@ -311,7 +212,8 @@ try
 
       sqw.addValue({{"timestamp", tim}, {"ip", ip}, {"url", url},
                     {"params", params}, {"agent", agent}, {"ref", ref},
-                    {"stat", stat}, {"siz", size}, {"host", host}, {"country", country}, {"lang", lang}});
+                    {"stat", stat}, {"siz", size}, {"host", host}, {"country", country}, {"lang", lang},
+		    {"asn", asnum}, {"asname", asname}});
 
       lock_guard<mutex> mut(g_metrics_mutex);
       map<string, string> labels;
